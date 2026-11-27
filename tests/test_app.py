@@ -11,7 +11,8 @@ from streamlit.testing.v1 import AppTest  # noqa: E402
 def run():
     at = AppTest.from_file(str(ROOT / "app.py"), default_timeout=30).run()
     assert not at.exception, at.exception
-    for lang in ("العربية", "English"):
+    for lang, theme in (("العربية", "☀️"), ("English", "🌙"), ("العربية", "🌙"), ("English", "☀️")):
+        at.radio(key="theme").set_value(theme).run()
         at.radio(key="lang_choice").set_value(lang).run()
         # الدليل: اضغط على أول فحص
         at.radio(key="page").set_value("guide").run()

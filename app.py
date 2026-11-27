@@ -14,76 +14,107 @@ IMG_DIR = Path(__file__).parent / "assets" / "images"
 st.set_page_config(page_title="X-ray Positioning Guide", page_icon="🩻", layout="wide",
                    initial_sidebar_state="collapsed")
 
-# ---------------- الشريط العلوي: الاسم + اللغة ----------------
-c_brand, c_lang = st.columns([3, 1.2])
+# ---------------- الشريط العلوي: الاسم + الثيم + اللغة ----------------
+c_brand, c_theme, c_lang = st.columns([3, 1.1, 1.3])
 with c_lang:
     lang_choice = st.radio("lang", ["العربية", "English"], horizontal=True, key="lang_choice",
                            label_visibility="collapsed")
+with c_theme:  # ☀️ فاتح (الافتراضي) / 🌙 داكن
+    theme_choice = st.radio("theme", ["☀️", "🌙"], horizontal=True, key="theme",
+                            label_visibility="collapsed")
 lang = "ar" if lang_choice == "العربية" else "en"
+dark = theme_choice == "🌙"
 t = TEXTS[lang]
 regions = REGION_NAMES[lang]
 
-# ---------------- الشكل (CSS): غرفة قراءة الأشعة — خلفية داكنة وعنبر ----------------
-rtl_css = """
-.block-container { direction: rtl; text-align: right; }
-""" if lang == "ar" else ""
+# ---------------- الشكل (CSS): ألوان الفاتح والداكن كمتغيرات ----------------
+LIGHT_VARS = """--bg:#ffffff; --panel:#f4f7fa; --border:#d3dce6; --text:#14212e; --muted:#5a6a7c;
+  --accent:#f59e0b; --accent-text:#b45309; --on-accent:#1a1203; --tint:rgba(217,119,6,.09);
+  --lightbox:#eef2f6; --glow:rgba(15,40,70,.10);"""
+DARK_VARS = """--bg:#0b0f14; --panel:#131a22; --border:#243040; --text:#e6edf3; --muted:#8b9bb0;
+  --accent:#f5b942; --accent-text:#f5b942; --on-accent:#0b0f14; --tint:rgba(245,185,66,.09);
+  --lightbox:#e9eef3; --glow:rgba(125,170,220,.14);"""
 
-st.markdown(
-    f"""
+# تعديلات إضافية في الوضع الداكن فقط (لأن ثيم ستريمليت الأساسي فاتح)
+DARK_EXTRA = """
+.stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] { background: var(--bg) !important; }
+.stApp, [data-testid="stMarkdownContainer"] { color: var(--text); }
+.stApp p, .stApp li, .stApp label, .stApp h1, .stApp h2, .stApp h3, .stApp h4,
+[data-testid="stWidgetLabel"] *, [data-testid="stExpander"] summary *, [data-testid="stCheckbox"] *,
+[data-testid="stHeader"] * { color: var(--text); }
+[data-baseweb="select"] > div { background: var(--panel) !important; border-color: var(--border) !important; }
+[data-baseweb="select"] * { color: var(--text) !important; }
+[data-baseweb="popover"], [data-baseweb="popover"] ul, [data-baseweb="popover"] li, [data-baseweb="menu"]
+{ background: var(--panel) !important; color: var(--text) !important; }
+[data-testid="stExpander"] details { background: var(--panel); border-color: var(--border); }
+[data-testid="stAlert"] { background: var(--panel) !important; border: 1px solid var(--border); }
+[data-testid="stAlert"] * { color: var(--text) !important; }
+"""
+
+CSS = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
-html, body, .stApp, .stMarkdown, button, label, p, h1, h2, h3, h4, input, li {{
+:root { /*VARS*/ }
+html, body, .stApp, .stMarkdown, button, label, p, h1, h2, h3, h4, input, li {
     font-family: 'IBM Plex Sans Arabic', 'IBM Plex Sans', 'Segoe UI', sans-serif;
-}}
-[data-testid="stSidebar"], [data-testid="collapsedControl"], [data-testid="stSidebarCollapsedControl"] {{ display: none; }}
-.block-container {{ max-width: 1150px; padding-top: 4.2rem; }}
-{rtl_css}
-.brand {{ display: flex; align-items: center; gap: .8rem; padding: .3rem 0 .6rem; }}
-.brand .logo {{
+}
+/*DARK*/
+[data-testid="stSidebar"], [data-testid="collapsedControl"], [data-testid="stSidebarCollapsedControl"] { display: none; }
+.block-container { max-width: 1150px; padding-top: 4.2rem; }
+/*RTL*/
+.brand { display: flex; align-items: center; gap: .8rem; padding: .3rem 0 .6rem; }
+.brand .logo {
     width: 46px; height: 46px; border-radius: 10px; display: grid; place-items: center; font-size: 1.5rem;
-    background: #f5b942; color: #0b0f14; box-shadow: 0 0 18px rgba(245,185,66,.45);
-}}
-.brand .name {{ font-size: 1.35rem; font-weight: 700; line-height: 1.2; }}
-.brand .sub {{ font-size: .8rem; color: #8b9bb0; letter-spacing: .06em; }}
+    background: var(--accent); color: var(--on-accent); box-shadow: 0 4px 18px var(--glow);
+}
+.brand .name { font-size: 1.35rem; font-weight: 700; line-height: 1.2; }
+.brand .sub { font-size: .8rem; color: var(--muted); letter-spacing: .06em; }
 /* كل أزرار الاختيار (radio) تتحول لأزرار شكل حبوب */
-div[role="radiogroup"] {{ gap: .45rem; }}
-div[role="radiogroup"] > label {{
-    background: #131a22; border: 1px solid #243040; border-radius: 10px; padding: .45rem 1rem;
+div[role="radiogroup"] { gap: .45rem; }
+div[role="radiogroup"] > label {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: .45rem 1rem;
     transition: border-color .15s, background .15s;
-}}
-div[role="radiogroup"] > label > div:first-child {{ display: none; }}
-div[role="radiogroup"] > label:hover {{ border-color: #f5b942; }}
-div[role="radiogroup"] > label:has(input:checked) {{ background: #f5b942; border-color: #f5b942; }}
-div[role="radiogroup"] > label:has(input:checked) * {{ color: #0b0f14 !important; font-weight: 700; }}
-.title-row {{ display: flex; align-items: baseline; gap: .8rem; flex-wrap: wrap; margin: 1.2rem 0 .3rem; }}
-.title-row h1 {{ font-size: 1.9rem; margin: 0; padding: 0; }}
-.pill {{ border: 1px solid #f5b942; color: #f5b942; border-radius: 999px; padding: .05rem .8rem; font-size: .85rem; font-weight: 600; }}
-.lead {{ color: #a8b5c6; line-height: 1.9; margin-bottom: 1rem; }}
-.exam-title {{ font-size: 1.5rem; font-weight: 700; margin: 1.4rem 0 .2rem; }}
-.exam-title span {{ color: #f5b942; font-size: .95rem; font-weight: 600; margin-inline-start: .7rem; }}
-.lightbox {{
-    background: #e9eef3; border-radius: 14px; padding: 12px; position: relative;
-    border: 2px solid #243040; box-shadow: 0 0 30px rgba(125,170,220,.12);
-}}
-.lightbox img {{ width: 100%; display: block; border-radius: 8px; }}
-.lightbox .tag {{ position: absolute; top: 18px; inset-inline-start: 20px; background: #0b0f14; color: #f5b942;
-    font-weight: 700; font-size: .72rem; padding: .1rem .55rem; border-radius: 6px; letter-spacing: .08em; }}
-.caption {{ font-size: .8rem; color: #8b9bb0; margin-top: .4rem; }}
-.spec {{ border: 1px solid #243040; border-radius: 14px; overflow: hidden; background: #131a22; }}
-.spec .row {{ display: grid; grid-template-columns: 9rem 1fr; border-bottom: 1px solid #243040; }}
-.spec .row:last-child {{ border-bottom: none; }}
-.spec .k {{ padding: .75rem 1rem; background: rgba(245,185,66,.08); color: #f5b942; font-weight: 600; font-size: .88rem; }}
-.spec .v {{ padding: .75rem 1rem; line-height: 1.8; }}
-.spec .hl .v {{ font-weight: 700; color: #ffe2a3; }}
-.qcard {{ background: #131a22; border: 1px solid #243040; border-inline-start: 5px solid #f5b942;
-    border-radius: 12px; padding: 1rem 1.3rem; margin: .6rem 0 1rem; line-height: 1.9; }}
-.qnum {{ color: #f5b942; font-weight: 700; letter-spacing: .05em; }}
-.footer {{ text-align: center; color: #8b9bb0; font-size: .85rem; margin-top: 2.5rem; }}
-div.stButton > button {{ border-radius: 10px; font-weight: 700; }}
-div.stButton > button[kind="primary"] {{ color: #0b0f14; }}
-@media (max-width: 700px) {{ .spec .row {{ grid-template-columns: 1fr; }} }}
+}
+div[role="radiogroup"] > label > div:first-child { display: none; }
+div[role="radiogroup"] > label:hover { border-color: var(--accent); }
+div[role="radiogroup"] > label:has(input:checked) { background: var(--accent); border-color: var(--accent); }
+div[role="radiogroup"] > label:has(input:checked) * { color: var(--on-accent) !important; font-weight: 700; }
+.title-row { display: flex; align-items: baseline; gap: .8rem; flex-wrap: wrap; margin: 1.2rem 0 .3rem; }
+.title-row h1 { font-size: 1.9rem; margin: 0; padding: 0; }
+.title-row .pill { border: 1px solid var(--accent-text); color: var(--accent-text); border-radius: 999px;
+    padding: .05rem .8rem; font-size: .85rem; font-weight: 600; }
+.lead { color: var(--muted); line-height: 1.9; margin-bottom: 1rem; }
+.exam-title { font-size: 1.5rem; font-weight: 700; margin: 1.4rem 0 .2rem; }
+.exam-title span { color: var(--accent-text); font-size: .95rem; font-weight: 600; margin-inline-start: .7rem; }
+.lightbox {
+    background: var(--lightbox); border-radius: 14px; padding: 12px; position: relative;
+    border: 2px solid var(--border); box-shadow: 0 4px 30px var(--glow);
+}
+.lightbox img { width: 100%; display: block; border-radius: 8px; }
+.lightbox .tag { position: absolute; top: 18px; inset-inline-start: 20px; background: #0b0f14; color: #f5b942;
+    font-weight: 700; font-size: .72rem; padding: .1rem .55rem; border-radius: 6px; letter-spacing: .08em; }
+.caption { font-size: .8rem; color: var(--muted); margin-top: .4rem; }
+.spec { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--panel); }
+.spec .row { display: grid; grid-template-columns: 9rem 1fr; border-bottom: 1px solid var(--border); }
+.spec .row:last-child { border-bottom: none; }
+.spec .k { padding: .75rem 1rem; background: var(--tint); color: var(--accent-text); font-weight: 600; font-size: .88rem; }
+.spec .v { padding: .75rem 1rem; line-height: 1.8; }
+.spec .hl .v { font-weight: 700; }
+.qcard { background: var(--panel); border: 1px solid var(--border); border-inline-start: 5px solid var(--accent);
+    border-radius: 12px; padding: 1rem 1.3rem; margin: .6rem 0 1rem; line-height: 1.9; }
+.qnum { color: var(--accent-text); font-weight: 700; letter-spacing: .05em; }
+.footer { text-align: center; color: var(--muted); font-size: .85rem; margin-top: 2.5rem; }
+div.stButton > button { border-radius: 10px; font-weight: 700; }
+div.stButton > button[kind="primary"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+div.stButton > button[kind="primary"] * { color: var(--on-accent) !important; }
+@media (max-width: 700px) { .spec .row { grid-template-columns: 1fr; } }
 </style>
-""",
+"""
+rtl_css = ".block-container { direction: rtl; text-align: right; }" if lang == "ar" else ""
+st.markdown(
+    CSS.replace("/*VARS*/", DARK_VARS if dark else LIGHT_VARS)
+       .replace("/*DARK*/", DARK_EXTRA if dark else "")
+       .replace("/*RTL*/", rtl_css),
     unsafe_allow_html=True,
 )
 
