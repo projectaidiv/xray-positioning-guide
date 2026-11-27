@@ -11,63 +11,91 @@ from translations import REGION_NAMES, TEXTS
 
 IMG_DIR = Path(__file__).parent / "assets" / "images"
 
-st.set_page_config(page_title="X-ray Positioning Guide", page_icon="🩻", layout="wide")
+st.set_page_config(page_title="X-ray Positioning Guide", page_icon="🩻", layout="wide",
+                   initial_sidebar_state="collapsed")
 
-# ---------------- اللغة والتنقل ----------------
-st.sidebar.markdown("### 🩻 X-ray Guide")
-lang_choice = st.sidebar.radio("🌐", ["العربية", "English"], horizontal=True, key="lang_choice",
-                               label_visibility="collapsed")
+# ---------------- الشريط العلوي: الاسم + اللغة ----------------
+c_brand, c_lang = st.columns([3, 1.2])
+with c_lang:
+    lang_choice = st.radio("lang", ["العربية", "English"], horizontal=True, key="lang_choice",
+                           label_visibility="collapsed")
 lang = "ar" if lang_choice == "العربية" else "en"
 t = TEXTS[lang]
 regions = REGION_NAMES[lang]
 
-page = st.sidebar.radio(t["nav"], ["guide", "quiz", "about"], format_func=lambda k: t["nav_" + k], key="page")
-st.sidebar.info(t["disclaimer"])
-
-# ---------------- الشكل (CSS) ----------------
+# ---------------- الشكل (CSS): غرفة قراءة الأشعة — خلفية داكنة وعنبر ----------------
 rtl_css = """
-.block-container, [data-testid="stSidebarUserContent"] { direction: rtl; text-align: right; }
-[data-testid="stRadio"] label, [data-testid="stCheckbox"] label { direction: rtl; }
+.block-container { direction: rtl; text-align: right; }
 """ if lang == "ar" else ""
 
 st.markdown(
     f"""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
-html, body, .stApp, .stMarkdown, button, label, p, h1, h2, h3, h4, input {{ font-family: 'Tajawal', 'Segoe UI', sans-serif; }}
-.block-container {{ max-width: 1100px; padding-top: 1.5rem; }}
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+html, body, .stApp, .stMarkdown, button, label, p, h1, h2, h3, h4, input, li {{
+    font-family: 'IBM Plex Sans Arabic', 'IBM Plex Sans', 'Segoe UI', sans-serif;
+}}
+[data-testid="stSidebar"], [data-testid="collapsedControl"], [data-testid="stSidebarCollapsedControl"] {{ display: none; }}
+.block-container {{ max-width: 1150px; padding-top: 4.2rem; }}
 {rtl_css}
-.hero {{
-    background: linear-gradient(120deg, #0f766e 0%, #0e7490 100%); color: #fff;
-    border-radius: 18px; padding: 1.6rem 1.8rem; margin-bottom: 1.2rem;
+.brand {{ display: flex; align-items: center; gap: .8rem; padding: .3rem 0 .6rem; }}
+.brand .logo {{
+    width: 46px; height: 46px; border-radius: 10px; display: grid; place-items: center; font-size: 1.5rem;
+    background: #f5b942; color: #0b0f14; box-shadow: 0 0 18px rgba(245,185,66,.45);
 }}
-.hero h1 {{ color: #fff; font-size: 2rem; margin: 0 0 .4rem; padding: 0; }}
-.hero p {{ margin: 0; opacity: .92; font-size: 1.05rem; line-height: 1.8; }}
-.hero .stats {{ margin-top: 1rem; display: flex; gap: .7rem; flex-wrap: wrap; }}
-.hero .stat {{ background: rgba(255,255,255,.16); border-radius: 12px; padding: .35rem .9rem; font-weight: 700; }}
-.exam-head {{
-    border-inline-start: 6px solid #0f766e; background: #fff; border-radius: 12px;
-    padding: .9rem 1.2rem; margin: 1.2rem 0 1rem; box-shadow: 0 1px 4px rgba(15,118,110,.12);
+.brand .name {{ font-size: 1.35rem; font-weight: 700; line-height: 1.2; }}
+.brand .sub {{ font-size: .8rem; color: #8b9bb0; letter-spacing: .06em; }}
+/* كل أزرار الاختيار (radio) تتحول لأزرار شكل حبوب */
+div[role="radiogroup"] {{ gap: .45rem; }}
+div[role="radiogroup"] > label {{
+    background: #131a22; border: 1px solid #243040; border-radius: 10px; padding: .45rem 1rem;
+    transition: border-color .15s, background .15s;
 }}
-.exam-head .title {{ font-size: 1.45rem; font-weight: 800; color: #0f766e; }}
-.badge {{ display: inline-block; margin-top: .3rem; background: #ccfbf1; color: #0f766e;
-          border-radius: 999px; padding: .1rem .8rem; font-weight: 700; font-size: .85rem; }}
-.fact {{ background: #fff; border: 1px solid #cfe7e4; border-radius: 12px; padding: .7rem 1rem; margin-bottom: .6rem; }}
-.fact .k {{ font-size: .82rem; font-weight: 700; color: #0e7490; margin-bottom: .15rem; }}
-.fact .v {{ font-size: 1rem; line-height: 1.7; }}
-.diagram img {{ width: 100%; border-radius: 14px; border: 1px solid #cfe7e4; background: #fff; }}
-.small-note {{ font-size: .8rem; opacity: .7; margin-top: .3rem; }}
-.footer {{ text-align: center; opacity: .65; font-size: .85rem; margin-top: 2.5rem; }}
-div.stButton > button {{ border-radius: 12px; font-weight: 700; width: 100%; }}
+div[role="radiogroup"] > label > div:first-child {{ display: none; }}
+div[role="radiogroup"] > label:hover {{ border-color: #f5b942; }}
+div[role="radiogroup"] > label:has(input:checked) {{ background: #f5b942; border-color: #f5b942; }}
+div[role="radiogroup"] > label:has(input:checked) * {{ color: #0b0f14 !important; font-weight: 700; }}
+.title-row {{ display: flex; align-items: baseline; gap: .8rem; flex-wrap: wrap; margin: 1.2rem 0 .3rem; }}
+.title-row h1 {{ font-size: 1.9rem; margin: 0; padding: 0; }}
+.pill {{ border: 1px solid #f5b942; color: #f5b942; border-radius: 999px; padding: .05rem .8rem; font-size: .85rem; font-weight: 600; }}
+.lead {{ color: #a8b5c6; line-height: 1.9; margin-bottom: 1rem; }}
+.exam-title {{ font-size: 1.5rem; font-weight: 700; margin: 1.4rem 0 .2rem; }}
+.exam-title span {{ color: #f5b942; font-size: .95rem; font-weight: 600; margin-inline-start: .7rem; }}
+.lightbox {{
+    background: #e9eef3; border-radius: 14px; padding: 12px; position: relative;
+    border: 2px solid #243040; box-shadow: 0 0 30px rgba(125,170,220,.12);
+}}
+.lightbox img {{ width: 100%; display: block; border-radius: 8px; }}
+.lightbox .tag {{ position: absolute; top: 18px; inset-inline-start: 20px; background: #0b0f14; color: #f5b942;
+    font-weight: 700; font-size: .72rem; padding: .1rem .55rem; border-radius: 6px; letter-spacing: .08em; }}
+.caption {{ font-size: .8rem; color: #8b9bb0; margin-top: .4rem; }}
+.spec {{ border: 1px solid #243040; border-radius: 14px; overflow: hidden; background: #131a22; }}
+.spec .row {{ display: grid; grid-template-columns: 9rem 1fr; border-bottom: 1px solid #243040; }}
+.spec .row:last-child {{ border-bottom: none; }}
+.spec .k {{ padding: .75rem 1rem; background: rgba(245,185,66,.08); color: #f5b942; font-weight: 600; font-size: .88rem; }}
+.spec .v {{ padding: .75rem 1rem; line-height: 1.8; }}
+.spec .hl .v {{ font-weight: 700; color: #ffe2a3; }}
+.qcard {{ background: #131a22; border: 1px solid #243040; border-inline-start: 5px solid #f5b942;
+    border-radius: 12px; padding: 1rem 1.3rem; margin: .6rem 0 1rem; line-height: 1.9; }}
+.qnum {{ color: #f5b942; font-weight: 700; letter-spacing: .05em; }}
+.footer {{ text-align: center; color: #8b9bb0; font-size: .85rem; margin-top: 2.5rem; }}
+div.stButton > button {{ border-radius: 10px; font-weight: 700; }}
+div.stButton > button[kind="primary"] {{ color: #0b0f14; }}
+@media (max-width: 700px) {{ .spec .row {{ grid-template-columns: 1fr; }} }}
 </style>
 """,
     unsafe_allow_html=True,
 )
 
+with c_brand:
+    st.markdown(
+        f'<div class="brand"><div class="logo">🩻</div><div><div class="name">{t["brand"]}</div>'
+        f'<div class="sub">{t["brand_sub"]}</div></div></div>',
+        unsafe_allow_html=True,
+    )
 
-def fact(label, value):
-    st.markdown(f'<div class="fact"><div class="k">{label}</div><div class="v">{value}</div></div>',
-                unsafe_allow_html=True)
+page = st.radio(t["nav"], ["guide", "quiz", "about"], format_func=lambda k: t["nav_" + k],
+                horizontal=True, key="page", label_visibility="collapsed")
 
 
 def find_real_image(exam_id):
@@ -82,80 +110,55 @@ def find_real_image(exam_id):
 # ---------------- صفحة الدليل ----------------
 def guide_page():
     st.markdown(
-        f"""<div class="hero"><h1>🩻 {t['hero_title']}</h1><p>{t['hero_text']}</p>
-        <div class="stats"><span class="stat">{len(EXAMS)} {t['stat_exams']}</span>
-        <span class="stat">{len(REGIONS)} {t['stat_regions']}</span></div></div>""",
+        f'<div class="title-row"><h1>{t["hero_title"]}</h1>'
+        f'<span class="pill">{len(EXAMS)} {t["stat_exams"]}</span>'
+        f'<span class="pill">{len(REGIONS)} {t["stat_regions"]}</span></div>'
+        f'<div class="lead">{t["hero_text"]}</div>',
         unsafe_allow_html=True,
     )
 
-    c1, c2 = st.columns([1, 1.4])
-    query = c1.text_input(t["search_label"], placeholder=t["search_ph"]).strip().lower()
-    region_key = c2.radio(
-        t["region_label"], ["all"] + REGIONS, horizontal=True,
-        format_func=lambda k: t["region_all"] if k == "all" else regions[k],
-    )
+    st.markdown(f"**{t['region_label']}**")
+    region_key = st.radio("region", ["all"] + REGIONS, horizontal=True, key="region",
+                          format_func=lambda k: t["region_all"] if k == "all" else regions[k],
+                          label_visibility="collapsed")
+    shown = [e for e in EXAMS if region_key == "all" or e["region"] == region_key]
 
-    shown = [
-        e for e in EXAMS
-        if (region_key == "all" or e["region"] == region_key)
-        and (not query or query in e["ar"]["name"].lower() or query in e["en"]["name"].lower())
-    ]
-    if not shown:
-        st.warning(t["no_results"])
-        return
-
-    if st.session_state.get("sel") not in [e["id"] for e in shown]:
-        st.session_state["sel"] = None
-
-    st.caption(f"{t['results_count']}: {len(shown)}")
-    cols = st.columns(3)
-    for i, e in enumerate(shown):
-        is_sel = st.session_state.get("sel") == e["id"]
-        if cols[i % 3].button(e[lang]["name"], key=f"btn_{e['id']}", type="primary" if is_sel else "secondary"):
-            st.session_state["sel"] = e["id"]
-            is_sel = True
-
-    exam = next((e for e in shown if e["id"] == st.session_state.get("sel")), None)
-    if exam is None:
-        st.info(t["choose_hint"])
-        return
-    show_exam(exam)
+    by_name = {e[lang]["name"]: e for e in shown}  # الأسماء فريدة داخل كل لغة
+    name = st.selectbox(t["select_exam"], list(by_name), key=f"exam_{region_key}_{lang}")
+    show_exam(by_name[name])
 
 
 def show_exam(exam):
     d = exam[lang]
-    st.markdown(
-        f'<div class="exam-head"><div class="title">{d["name"]}</div>'
-        f'<span class="badge">{regions[exam["region"]]}</span></div>',
-        unsafe_allow_html=True,
-    )
+    st.markdown(f'<div class="exam-title">{d["name"]}<span>{regions[exam["region"]]}</span></div>',
+                unsafe_allow_html=True)
 
-    left, right = st.columns([1.15, 1])
+    left, right = st.columns([1.1, 1])
     with left:
-        st.markdown(f"**{t['diagram_title']}**")
-        st.markdown(f'<div class="diagram"><img src="{svg_data_uri(exam["diagram"], exam["sid"])}" alt="diagram"></div>',
-                    unsafe_allow_html=True)
-        st.markdown(f'<div class="small-note">{t["diagram_note"]}</div>', unsafe_allow_html=True)
+        st.markdown(
+            f'<div class="lightbox"><div class="tag">{t["diagram_title"]}</div>'
+            f'<img src="{svg_data_uri(exam["diagram"], exam["sid"])}" alt="diagram"></div>'
+            f'<div class="caption">{t["diagram_note"]}</div>',
+            unsafe_allow_html=True,
+        )
         real = find_real_image(exam["id"])
         if real:
             st.image(str(real), caption=t["real_image"], use_container_width=True)
     with right:
-        st.markdown(f"**{t['quick_facts']}**")
-        fact(t["f_position"], d["position"])
-        fact(t["f_beam"], d["beam"])
-        fact(t["f_detector"], d["detector"])
-        fact(t["f_cr"], d["cr"])
-        fact(t["f_sid"], f"{exam['sid']} cm")
+        rows = [("f_position", d["position"], ""), ("f_beam", d["beam"], ""), ("f_detector", d["detector"], ""),
+                ("f_cr", d["cr"], "hl"), ("f_sid", f"{exam['sid']} cm", "hl")]
+        html = "".join(f'<div class="row {c}"><div class="k">{t[k]}</div><div class="v">{v}</div></div>'
+                       for k, v, c in rows)
+        st.markdown(f'<div class="spec">{html}</div>', unsafe_allow_html=True)
 
-    tab_before, tab_quality = st.tabs([t["tab_before"], t["tab_quality"]])
-    with tab_before:
+    with st.expander(t["tab_before"], expanded=True):
         st.markdown(f"**{t['specific_title']}**")
         for i, item in enumerate(d["before"]):
             st.checkbox(item, key=f"chk_{exam['id']}_{lang}_s{i}")
         st.markdown(f"**{t['general_title']}**")
         for i, item in enumerate(t["general_before"]):
             st.checkbox(item, key=f"chk_{exam['id']}_{lang}_g{i}")
-    with tab_quality:
+    with st.expander(t["tab_quality"], expanded=True):
         for item in d["quality"]:
             st.markdown(f"- {item}")
 
@@ -164,14 +167,14 @@ def show_exam(exam):
 
 # ---------------- صفحة الاختبار ----------------
 def quiz_page():
-    st.title(f"📝 {t['quiz_title']}")
+    st.markdown(f'<div class="title-row"><h1>{t["quiz_title"]}</h1></div>', unsafe_allow_html=True)
     state = st.session_state.get("quiz")
     if state is not None and state["lang"] != lang:  # تغيير اللغة يبدأ اختبار جديد
         state = None
         st.session_state.pop("quiz", None)
 
     if state is None:
-        st.write(t["quiz_intro"])
+        st.markdown(f'<div class="lead">{t["quiz_intro"]}</div>', unsafe_allow_html=True)
         if st.button(t["quiz_start"], type="primary"):
             st.session_state["quiz"] = {
                 "qs": build_questions(lang, QUIZ_LENGTH), "i": 0, "score": 0, "answered": None, "lang": lang,
@@ -192,8 +195,9 @@ def quiz_page():
 
     q = qs[i]
     st.progress(i / len(qs))
-    st.markdown(f"**{t['quiz_q']} {i + 1} {t['quiz_of']} {len(qs)}**")
-    st.markdown(q["q"])
+    q_html = q["q"].replace("\n\n", "<br><br>")
+    st.markdown(f'<div class="qcard"><div class="qnum">{t["quiz_q"]} {i + 1} {t["quiz_of"]} {len(qs)}</div>{q_html}</div>',
+                unsafe_allow_html=True)
     choice = st.radio("answer", q["options"], index=None, key=f"q_{i}",
                       disabled=state["answered"] is not None, label_visibility="collapsed")
 
@@ -220,7 +224,7 @@ def quiz_page():
 
 # ---------------- صفحة عن المشروع ----------------
 def about_page():
-    st.title(t["about_title"])
+    st.markdown(f'<div class="title-row"><h1>{t["about_title"]}</h1></div>', unsafe_allow_html=True)
     st.write(t["about_intro"])
     st.subheader(t["about_how_title"])
     st.markdown("\n".join(f"{n}. {s}" for n, s in enumerate(t["about_how"], 1)))

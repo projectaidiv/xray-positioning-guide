@@ -12,13 +12,16 @@ def run():
     at = AppTest.from_file(str(ROOT / "app.py"), default_timeout=30).run()
     assert not at.exception, at.exception
     for lang in ("العربية", "English"):
-        at.sidebar.radio(key="lang_choice").set_value(lang).run()
+        at.radio(key="lang_choice").set_value(lang).run()
         # الدليل: اضغط على أول فحص
-        at.sidebar.radio(key="page").set_value("guide").run()
-        at.button(key="btn_chest_pa").click().run()
+        at.radio(key="page").set_value("guide").run()
+        assert len(at.selectbox) == 1
+        for k in range(len(at.selectbox[0].options)):   # جرّب كل الفحوصات
+            at.selectbox[0].select_index(k).run()
+            assert not at.exception, at.exception
         assert not at.exception, at.exception
         # الاختبار: ابدأ وأجب على كل الأسئلة
-        at.sidebar.radio(key="page").set_value("quiz").run()
+        at.radio(key="page").set_value("quiz").run()
         at.button[0].click().run()
         for i in range(10):
             at.radio(key=f"q_{i}").set_value(at.radio(key=f"q_{i}").options[0]).run()
@@ -26,7 +29,7 @@ def run():
             at.button[0].click().run()   # التالي
             assert not at.exception, at.exception
         assert any("/ 10" in s.value for s in at.subheader), "مفيش شاشة نتيجة"
-        at.sidebar.radio(key="page").set_value("about").run()
+        at.radio(key="page").set_value("about").run()
         assert not at.exception, at.exception
     print("✅ الموقع شغال: الدليل والاختبار وعن المشروع بالعربي والإنجليزي.")
 

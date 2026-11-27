@@ -14,9 +14,9 @@ Labels are English only (standard radiography terms) so no Arabic font is needed
 import base64
 import math
 
-TEAL = "#0f766e"
-LIGHT = "#ccfbf1"
-DARK = "#334155"
+TEAL = "#475569"
+LIGHT = "#e2e8f0"
+DARK = "#1e293b"
 RED = "#dc2626"
 W, H = 640, 340
 
@@ -38,7 +38,7 @@ def _wrap(body: str, sid: int | None, note: str | None) -> str:
 
 def _tube(x, y, w=74, h=44):
     return (
-        f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="8" fill="{TEAL}"/>'
+        f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="8" fill="#b45309"/>'
         f'<text x="{x + w / 2}" y="{y + h / 2 + 5}" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Tube</text>'
     )
 
