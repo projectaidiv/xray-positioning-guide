@@ -39,6 +39,10 @@ for lang in ("ar", "en"):
         if r not in REGION_NAMES[lang]:
             errors.append(f"اسم المنطقة {r} ناقص في {lang}")
 
+missing = [e["id"] for e in EXAMS if not any((Path(__file__).resolve().parents[1] / "assets" / "images" / f"{e['id']}.{x}").exists() for x in ("jpg", "jpeg", "png", "webp"))]
+if missing:
+    print("ℹ️ فحوصات بدون صورة (هتظهر برسم SVG بديل):", ", ".join(missing))
+
 if errors:
     print("❌ مشاكل:")
     print("\n".join(" - " + m for m in errors))

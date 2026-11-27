@@ -174,12 +174,12 @@ EXAMS = [
     },
     {
         "id": "lspine_lat", "region": "head_spine", "sid": 100,
-        "diagram": {"t": "lateral_recum", "note": "Pad under the waist"},
+        "diagram": {"t": "supine", "cr_x": 0.45, "note": "Side-lying, vertical beam"},
         "ar": {
             "name": "الفقرات القطنية — جانبي (Lumbar Spine Lateral)",
             "position": "المريض راقد على جانبه، الركبتان مثنيتان، الذراعان مرفوعتان فوق الرأس، والمستوى التاجي الأوسط عمودي على الطاولة. توضع وسادة تحت الخصر ليبقى العمود الفقري أفقيًا.",
-            "beam": "أفقي، عمودي على الديتكتور (من الجانب).",
-            "detector": "ديتكتور رأسي خلف المريض مقاس 35×43 سم بالطول.",
+            "beam": "رأسي، عمودي على الديتكتور (من أعلى الجسم عبر الجانب).",
+            "detector": "ديتكتور تحت الطاولة (Bucky) مقاس 35×43 سم بالطول.",
             "cr": "عند L3 (حوالي 5 سم فوق قمة العرف الحرقفي) وعلى المستوى التاجي الأوسط.",
             "before": ["اسأل عن الحمل.", "تأكد أن الحوض والأكتاف في خط واحد عمودي على الطاولة."],
             "quality": ["تراكب العُنَيقات (Pedicles) والعناصر الخلفية.", "اتساع مسافات الأقراص بين الفقرات.", "ظهور الفقرات من T12 إلى العجز."],
@@ -187,8 +187,8 @@ EXAMS = [
         "en": {
             "name": "Lumbar Spine — Lateral",
             "position": "Patient lying on the side, knees flexed, arms raised above the head, mid-coronal plane perpendicular to the table. A pad under the waist keeps the spine horizontal.",
-            "beam": "Horizontal, perpendicular to the detector (from the side).",
-            "detector": "Upright detector behind the patient, 35×43 cm portrait.",
+            "beam": "Vertical, perpendicular to the detector (from above, through the side of the body).",
+            "detector": "Detector under the table (Bucky), 35×43 cm portrait.",
             "cr": "At L3 (about 5 cm above the iliac crest) in the mid-coronal plane.",
             "before": ["Ask about pregnancy.", "Make sure the pelvis and shoulders are stacked perpendicular to the table."],
             "quality": ["Pedicles and posterior elements superimposed.", "Intervertebral disc spaces open.", "T12 to the sacrum shown."],
@@ -308,11 +308,11 @@ EXAMS = [
     },
     {
         "id": "knee_lat", "region": "lower", "sid": 100,
-        "diagram": {"t": "lateral_recum", "note": "CR 5-7 deg cephalad"},
+        "diagram": {"t": "limb", "part": "Knee (lateral)", "tilt": 6, "note": "CR 5-7 deg cephalad"},
         "ar": {
             "name": "الركبة — جانبي (Knee Lateral)",
             "position": "المريض راقد على الجانب المصاب، الركبة مثنية 20–30°، والجانب الخارجي للركبة ملامس للديتكتور، والساق الأخرى خلفها.",
-            "beam": "مائل 5–7° ناحية الرأس (Cephalad).",
+            "beam": "رأسي من الأعلى مع زاوية 5–7° ناحية الرأس (Cephalad).",
             "detector": "ديتكتور أو كاسيت 24×30 سم مع تضييق الحقل.",
             "cr": "حوالي 2.5 سم أسفل اللقمة الإنسية لعظمة الفخذ.",
             "before": ["حافظ على ثني الركبة 20–30° لأن الثني الزائد يغلق المسافة الرضفية الفخذية.", "إزالة الملابس الضيقة."],
@@ -321,7 +321,7 @@ EXAMS = [
         "en": {
             "name": "Knee — Lateral",
             "position": "Patient lying on the affected side, knee flexed 20–30°, outer side of the knee against the detector, the other leg placed behind.",
-            "beam": "Angled 5–7° cephalad.",
+            "beam": "From above, angled 5–7° cephalad.",
             "detector": "24×30 cm detector or cassette with collimation.",
             "cr": "About 2.5 cm below the medial femoral condyle.",
             "before": ["Keep the knee flexed 20–30°; more flexion closes the patellofemoral space.", "Remove tight clothing."],

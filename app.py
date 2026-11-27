@@ -1,4 +1,5 @@
 """دليل وضعيات التصوير الشعاعي — شغّله بالأمر:  streamlit run app.py"""
+import json
 from pathlib import Path
 
 import streamlit as st
@@ -129,13 +130,15 @@ page = st.radio(t["nav"], ["guide", "quiz", "about"], format_func=lambda k: t["n
                 horizontal=True, key="page", label_visibility="collapsed")
 
 
-def find_real_image(exam_id):
-    """لو فيه صورة حقيقية باسم <id>.jpg/.png في assets/images بتتعرض تلقائيًا."""
-    for ext in ("jpg", "jpeg", "png", "webp"):
+@st.cache_data(show_spinner=False)
+def exam_image_uri(exam_id, diagram_json, sid):
+    """صورة الـ 3D من assets/images/<id>.jpg|png، ولو مش موجودة بنرسم SVG احتياطي."""
+    import base64, json
+    for ext, mime in (("jpg", "jpeg"), ("jpeg", "jpeg"), ("png", "png"), ("webp", "webp")):
         p = IMG_DIR / f"{exam_id}.{ext}"
         if p.exists():
-            return p
-    return None
+            return f"data:image/{mime};base64," + base64.b64encode(p.read_bytes()).decode("ascii")
+    return svg_data_uri(json.loads(diagram_json), sid)
 
 
 # ---------------- صفحة الدليل ----------------
@@ -168,13 +171,10 @@ def show_exam(exam):
     with left:
         st.markdown(
             f'<div class="lightbox"><div class="tag">{t["diagram_title"]}</div>'
-            f'<img src="{svg_data_uri(exam["diagram"], exam["sid"])}" alt="diagram"></div>'
+            f'<img src="{exam_image_uri(exam["id"], json.dumps(exam["diagram"]), exam["sid"])}" alt="{d["name"]}"></div>'
             f'<div class="caption">{t["diagram_note"]}</div>',
             unsafe_allow_html=True,
         )
-        real = find_real_image(exam["id"])
-        if real:
-            st.image(str(real), caption=t["real_image"], use_container_width=True)
     with right:
         rows = [("f_position", d["position"], ""), ("f_beam", d["beam"], ""), ("f_detector", d["detector"], ""),
                 ("f_cr", d["cr"], "hl"), ("f_sid", f"{exam['sid']} cm", "hl")]
